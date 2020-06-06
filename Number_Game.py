@@ -1,121 +1,131 @@
 import tkinter
 import random
-import math
-
-Attemped = 0
-probmlemSolved = 0
-IncorrectSolved = 0
-problemPresented= 0
-CurrentProblemNumber = 0
-operators = [ '+' , '-' , '*' , '/' ]
-Clist = []
 
 
-def chechValidity (problem):
-    if problem in problemPresented:
-        return False
-    return True
 
+incorrectSubmission  = 0
+correctsubmission = 0
+Attempts = 0
+ListAnswers = []
 
 
 def initializeGame():
-    global CurrentProblemNumber
-    opIndex = random.randint(0,3)
-    operator = operators[opIndex]
-    valid = False 
-    while (valid == False):
-        if operator == '*':#2
-            n1 = random.randint(0,99)
-            n2 =random.randint(0,99)
-        elif operator == '+': #0
-            n1 = random.randint(0,999)
-            n2 =random.randint(0,999)      
-        elif operator == '-': #1
-            n1 = random.randint(0,999)
-            n2 = random.randint(0, n1)
-        elif operator == '/':#3
-            n1 = random.randint(0,999)
-            n2 = random.randint(1,n1)
-            while (n1 % n2 != 0): 
-                n1 = random.randint(0,999)
-                n2 = random.randint(1, n1)
-                pass
-        valid = True
-    if isDuplicate(operator,n1,n2):
-        c = (-1,-1,-1)
-        return c
-    else:
-        c= (operator, n1,n2)
-        Clist.append(c)
-        return c
-    
-    CurrentProblemNumber +=1
-    gameWindow.title(text = "Math Problem")
-    statusLabel.configure(text="You haven't made any guesses yet")
-    button1.configure(text="Check It!", command=checkNumbers)
-    button2.configure(text = "Show me a new game", command = initializeGame)
-    button3.configure(text = "Quit", command = QuitGame)
+    global Attempts
+    global NumberToPass
+    global Value
+    global answer
+    global operation
+    operators = ['+','-','*','/']
+    index = random.randint(0,3)
+    operation = operators[index]
+    check = False
+    while (check == False):
+        if operation == "*":
+            NumberToPass = random.randint(0,99)
+            Value = random.randint(0,99)
+        elif operation == '+':
+            NumberToPass = random.randint(0,999)
+            Value = random.randint(0,999)
+        elif operation == '-':
+            NumberToPass = random.randint(0,999)
+            Value = random.randint(0,999)
+        elif operation == "/":
+            NumberToPass = random.randint(0,999)
+            Value = random.randint(1,999)
+        check = True
     answers()
+    gameWindow.title("Compute the equations {} {} {} =".format(NumberToPass,operation,Value))
+    statusLabel.configure(text= "please enter an answer")
+    button1.configure(text = "Submit your answer", command=checkNumbers)
 
-def isDuplicate (operator, n1,n2):
-    global Clist
-    for tup in Clist:
-        if tup[1] == n1:
-            if tup[0] == operator and tup[2] == n2:
-                return True
-
-    return False
-
-
-   
 def answers():
-    global n1
-    global n2
-    global operator
-    if operator == '*':
-        answer = (n1 * n2)        
-    elif operator == '+':
-        answer = (n1 + n2)              
-    elif operator == '-':
-          answer = (n1 - n2)
-    elif operator == '/':
-        answer = (n1 / n2)    
-   
+    global NumberToPass
+    global Value
+    global answer
+    global operation
+    global ListAnswers
+    check = False
+    if operation == '*':
+        answer = (NumberToPass * Value)
+    elif operation == '-':
+        if (NumberToPass - Value) < 0:
+            while (check == False):
+                NumberToPass = random.randint(0,999)
+                Value = random.randint(0,999)
+                if (NumberToPass - Value) < 0:
+                    check = False
+                else:
+                    check = True
+                    answer = (NumberToPass - Value)
+        else:
+            answer = (NumberToPass - Value)
+    elif operation == '/':
+        if (NumberToPass % Value) != 0:
+            while (check == False):
+                NumberToPass = random.randint(0,999)
+                Value = random.randint(1,999)
+                if (NumberToPass % Value) != 0:
+                    check = False
+                else:
+                    check = True
+                    answer = (NumberToPass / Value)
+        else:
+            answer  = (NumberToPass / Value)
+    elif operation == '+':
+        answer = (NumberToPass + Value)
+    ListAnswers.append(answer)
 
-# read number entered into GUI by player, check whether it's correct, and
-# give appropriate feedback in the statusLabel
-#
+
+def checks():
+    global ListAnswers
+    for items in range(len(ListAnswers)):
+        if len(ListAnswers) == 1:
+            pass
+        if ListAnswers[items] == ListAnswers[items - 1]:
+            answers()
+        else:
+            pass
+        
 def checkNumbers():
     global answer
-    global correctNumberSolved
-    global IncorrectSolved
-    global Attemped
-    guessAsString = guessEntry.get()
-    guess = int(guessAsString)
-    if( guess == answer):
-        correctNumberSolved +=1
-        statusLabel.configure(text = str(guess)+" is right answer! - you win! ")
-        button2.configure(text = "Show me a new game", command = initializeGame) 
-        button3.configure(text = "Quit", command = QuitGame)
-        Attemped +=1
+    global Attempts
+    global incorrectSubmission
+    global correctsubmission
+    submissionString = guessEntry.get()
+    answer = guessEntry.get()
+    submission = (submissionString)
+    if (submission == answer):
+        Attempts += 1
+        correctsubmission += 1
+        statusLabel.configure(text = str(submission) + "is correct! Would you like to play again")
+        button1.configure(text = "New game", command = newGame)
+        button3.configure(text = 'New Question', command = initializeGame)
+    elif (submission != answer):
+        incorrectsubmission += 1
+        statusLabel.configure(text = str(submission) + "is not the correct answer.Try again")
+        button2.configure(text = 'Quit', command = quitGame)
+    guessEntry.delete(0,tkinter.END)
+    
+   
+def newGame():
+    initializeGame()
+    
+
+def quitGame():
+    global Attempts
+    global incorrectSubmission
+    global correctsubmission
+    if Attempts == 0:
+        average = (incorrectSubmission)
     else:
-        statusLabel.configure(text =  " Incorrect !")
-        button2.configure(text = "Show me a new game", command = initializeGame)
-        button3.configure(text = "Quit", command = QuitGame)
-        IncorrectSolved +=1
-        Attemped +=1
-    guessEntry.delete(0, tkinter.END)
-# global variables 
+        average = (incorrectSubmission/ Attempts)
+    print("you attempted {} problems, of which you got {} correct, and {} incorrect. The average for each attempt is {}.".format(Attempts, correctsubmission , incorrectSubmission, average))
+    gameWindow.destroy()
 
+operation = None
 
-
-# during a game, the number that is to be guessed
-answer = None
-
-# the main window, where interaction and feedback will occur
 gameWindow = None
 
-# the only button in the GUI
 button1 = None
 
 button2 = None
@@ -128,49 +138,49 @@ def initializeGameWindow():
     global guessEntry
     global statusLabel
     global button1
+    global statusLabel1
     global button2
-    global button3
-    global c
-    c = initializeGame()
-    while c ==(-1,-1,-1):
-        c = initializeGame()
-    problemLabText = str(c[1]) +str(c[0]) +str(c[2])
-    
+    global button3 
+    global root
+
     gameWindow = tkinter.Tk()
-    
-    # topFrame is a container to hold three widgets in the top row of the window
-    # 1) a label, 2) an Entry, where users can type guesses, 3) a button to press
+
     topFrame = tkinter.Frame(gameWindow)
     topFrame.pack()
     bottomFrame = tkinter.Frame(gameWindow)
     bottomFrame.pack()
-
-
-    label1 = tkinter.Label(topFrame, text = problemLabText)
+    label1 = tkinter.Label(topFrame, text = "Your Guess:")
     label1.pack(side=tkinter.LEFT)
     guessEntry = tkinter.Entry(topFrame)
-    guessEntry.pack(side=tkinter.LEFT)
-    button1 = tkinter.Button(topFrame, text= "Check It!", command = checkNumbers)
+    guessEntry.pack(side = tkinter.LEFT)
+    button1 = tkinter.Button(topFrame, text = "checkSubmission" , command = checkNumbers)
     button1.pack()
-    button2 = tkinter.Button(bottomFrame, text = "Show me a new game", command = initializeGame)
+    button2 = tkinter.Button(bottomFrame, text = "Quit", command = quitGame)
     button2.pack()
-    button3 = tkinter.Button(bottomFrame, text = "Quit", command = gameWindow.destroy)
+    button3 = tkinter.Button(bottomFrame, text = "New Question" , command = initializeGame)
     button3.pack()
+    
 
-    # create and place a Label below the topFrame container. Messages about
-    # game status will be shown on this label.
-    statusLabel = tkinter.Label(gameWindow, text="You haven't made any guesses yet")
+    statusLabel = tkinter.Label(gameWindow, text="there are no current submissions")
     statusLabel.pack()
+    statusLabel1 = tkinter.Label(gameWindow, text="Number of incorrect entries?")
+    statusLabel1.pack()
 
-
-
-
-# Call this function to start the GUI and game!
-#
-def startGameGUI():
-    global c
+def startGame():
+    global NumberToPass
+    global elements
+    global operation
     initializeGameWindow()
     initializeGame()
     gameWindow.mainloop()
+    
+    
+    
+
+    
+
+    
+    
+
 
 
