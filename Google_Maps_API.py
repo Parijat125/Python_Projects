@@ -7,7 +7,7 @@ import json
 
 
 
-GOOGLEAPIKEY = " "
+GOOGLEAPIKEY = "AIzaSyDIAHoeKUci0TwXf9CeUDYlPW5nr9pdtOc"
 
 class Globals:
    rootWindow = None
